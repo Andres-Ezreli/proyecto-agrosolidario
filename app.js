@@ -136,8 +136,60 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnLimpiar = document.getElementById("btnLimpiar");
     const btnBuscar = document.getElementById("btnBuscar");
 
-    // Si no existe el bloque de búsqueda, salimos
     if (!ubicacionInput || !habilidadesInput || !edadInput || !btnLimpiar || !btnBuscar) return;
+
+    const tieneOfertaPublicada = localStorage.getItem("tieneOfertaPublicada") === "1";
+
+    let overlayAviso = document.querySelector(".alert-overlay.alert-overlay--busqueda");
+    let overlayMsg, btnIrPublicar, btnCerrarAviso;
+
+    const crearOverlayAviso = () => {
+        if (overlayAviso) return;
+
+        overlayAviso = document.createElement("div");
+        overlayAviso.className = "alert-overlay alert-overlay--busqueda";
+        overlayAviso.innerHTML = `
+          <div class="alert-box" role="alertdialog" aria-modal="true">
+            <h3 class="alert-title">Antes de buscar trabajadores</h3>
+            <p class="alert-message"></p>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+              <button type="button" class="alert-btn alert-btn--ir">Ir a publicar oferta</button>
+              <button type="button" class="alert-btn alert-btn--cerrar">Volver</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlayAviso);
+
+        overlayMsg = overlayAviso.querySelector(".alert-message");
+        btnIrPublicar = overlayAviso.querySelector(".alert-btn--ir");
+        btnCerrarAviso = overlayAviso.querySelector(".alert-btn--cerrar");
+
+        btnIrPublicar.addEventListener("click", () => {
+            overlayAviso.classList.remove("show");
+            window.location.href = "./ofertas.html";
+        });
+
+        btnCerrarAviso.addEventListener("click", () => {
+            overlayAviso.classList.remove("show");
+        });
+
+        overlayAviso.addEventListener("click", (e) => {
+            if (e.target === overlayAviso) {
+                overlayAviso.classList.remove("show");
+            }
+        });
+    };
+
+    const mostrarAvisoDebePublicar = () => {
+        crearOverlayAviso();
+        overlayMsg.textContent =
+            'Para poder buscar trabajadores primero debes publicar una oferta de empleo en la sección "Mis ofertas".';
+        overlayAviso.classList.add("show");
+    };
+
+    if (!tieneOfertaPublicada) {
+        mostrarAvisoDebePublicar();
+    }
 
     const cards = Array.from(document.querySelectorAll(".busqueda-card"));
 
@@ -226,6 +278,11 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         ocultarMensaje();
 
+        if (!tieneOfertaPublicada) {
+            mostrarAvisoDebePublicar();
+            return;
+        }
+
         const filtros = {
             ubicacion: normalizar(ubicacionInput.value),
             habilidades: normalizar(habilidadesInput.value),
@@ -250,6 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ocultarMensaje();
     });
 });
+
 
 // ------------------ 3. PUBLICAR OFERTA + AVISO PUBLICADA -----------------------
 
@@ -420,6 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showConfirm("¿Estás seguro de realizar la publicación de la oferta?", () => {
             sessionStorage.setItem("mostrarAvisoPublicada", "1");
+            localStorage.setItem("tieneOfertaPublicada", "1");
             window.location.href = "./ofertas.html";
         });
     });
@@ -523,7 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// --------------------- 6. fin-oferta.html → guarda fecha fin en localStorage ---------------------
+// --------------------- 6. FIN OFERTA  ---------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!window.location.pathname.includes("fin-oferta.html")) return;
@@ -545,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// ----------- 7. lista-oferta.html → marcar ofertas finalizadas + bloquear revisión -----------
+// -------------------- 7. LISTA OFERTA  ----------------------
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!window.location.pathname.includes("lista-oferta.html")) return;
@@ -592,12 +651,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const focusableSelector =
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-    // Función reutilizable para cualquier botón que deba verificar campos completos
     const initRequiredFieldsAlert = (buttonSelector) => {
         const btnContinuar = document.querySelector(buttonSelector);
         if (!btnContinuar) return;
 
-    
+
         let overlay = document.querySelector(".alert-overlay.alert-overlay--required");
         if (!overlay) {
             overlay = document.createElement("div");
@@ -686,3 +744,406 @@ document.addEventListener("DOMContentLoaded", () => {
     initRequiredFieldsAlert(".btn-continuar");
     initRequiredFieldsAlert(".btn");
 });
+
+// -------------------- 9. AVISO SUBIDA DE ARCHIVOS ---------------------------
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Todos los inputs de archivo que ya usan la clase .file-input
+    const fileInputs = document.querySelectorAll(".file-input");
+    if (!fileInputs.length) return;
+
+    const focusableSelector =
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    let overlay = document.querySelector(".alert-overlay.alert-overlay--file");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.className = "alert-overlay alert-overlay--file";
+        overlay.innerHTML = `
+        <div class="alert-box" role="alertdialog" aria-modal="true">
+          <h3 class="alert-title">Archivo cargado</h3>
+          <p class="alert-message"></p>
+          <button type="button" class="alert-btn">Entendido</button>
+        </div>
+      `;
+        document.body.appendChild(overlay);
+    }
+
+    const alertMsg = overlay.querySelector(".alert-message");
+    const alertBtn = overlay.querySelector(".alert-btn");
+    let lastFocused = null;
+
+    const handleKeydown = (e) => {
+        if (!overlay.classList.contains("show")) return;
+
+        if (e.key === "Escape") {
+            e.preventDefault();
+            hideAlert();
+        }
+
+        if (e.key === "Tab") {
+            const focusable = Array.from(
+                overlay.querySelectorAll(focusableSelector)
+            ).filter(
+                (el) =>
+                    !el.hasAttribute("disabled") && el.offsetParent !== null
+            );
+            if (!focusable.length) return;
+
+            const currentIndex = focusable.indexOf(document.activeElement);
+            let nextIndex = currentIndex;
+
+            if (e.shiftKey) {
+                nextIndex =
+                    currentIndex <= 0
+                        ? focusable.length - 1
+                        : currentIndex - 1;
+            } else {
+                nextIndex =
+                    currentIndex === focusable.length - 1
+                        ? 0
+                        : currentIndex + 1;
+            }
+
+            focusable[nextIndex].focus();
+            e.preventDefault();
+        }
+    };
+
+    const showAlert = (message) => {
+        lastFocused = document.activeElement;
+        alertMsg.textContent = message;
+        overlay.classList.add("show");
+        alertBtn.focus();
+        document.addEventListener("keydown", handleKeydown);
+    };
+
+    const hideAlert = () => {
+        overlay.classList.remove("show");
+        document.removeEventListener("keydown", handleKeydown);
+        if (lastFocused) lastFocused.focus();
+    };
+
+    alertBtn.addEventListener("click", hideAlert);
+
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) hideAlert();
+    });
+
+    fileInputs.forEach((input) => {
+        input.addEventListener("change", () => {
+            if (!input.files || !input.files.length) return;
+
+            const nombreArchivo = input.files[0].name;
+
+            showAlert(`El archivo "${nombreArchivo}" se cargó correctamente.`);
+        });
+    });
+});
+
+// -------------------- 10. NAVEGACIÓN PERSONAS ACEPTADAS ----------------------
+
+document.addEventListener("DOMContentLoaded", () => {
+    const cards = Array.from(document.querySelectorAll(".aceptados-card"));
+    const navBtns = document.querySelectorAll(".aceptados-nav .aceptados-nav__btn");
+    const btnSiguiente = navBtns.length > 1 ? navBtns[1] : null;
+
+    if (!cards.length || !btnSiguiente) return;
+
+    let indiceActual = 0;
+
+    cards.forEach((card, index) => {
+        card.style.display = index === 0 ? "" : "none";
+    });
+
+    let overlay = document.querySelector(".alert-overlay.alert-overlay--aceptados");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.className = "alert-overlay alert-overlay--aceptados";
+        overlay.innerHTML = `
+        <div class="alert-box" role="alertdialog" aria-modal="true">
+            <h3 class="alert-title">No hay más personas</h3>
+            <p class="alert-message">
+                Por ahora no hay más personas que hayan aceptado tu oferta.
+            </p>
+            <button type="button" class="alert-btn">Entendido</button>
+        </div>
+      `;
+        document.body.appendChild(overlay);
+    }
+
+    const btnCerrar = overlay.querySelector(".alert-btn");
+
+    const mostrarOverlay = () => {
+        overlay.classList.add("show");
+    };
+
+    const ocultarOverlay = () => {
+        overlay.classList.remove("show");
+    };
+
+    btnCerrar.addEventListener("click", ocultarOverlay);
+
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) ocultarOverlay();
+    });
+
+    btnSiguiente.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        if (indiceActual < cards.length - 1) {
+            cards[indiceActual].style.display = "none";
+            indiceActual += 1;
+            cards[indiceActual].style.display = "";
+        } else {
+            mostrarOverlay();
+        }
+    });
+});
+
+// -------------------- 11. AVISO ACEPTAR / RECHAZAR SOLICITUD + SIGUIENTE CARD ---------------------
+
+document.addEventListener("DOMContentLoaded", () => {
+    const cards = Array.from(document.querySelectorAll(".solicitud-card"));
+    if (!cards.length) return;
+
+    let indiceActual = 0;
+    cards.forEach((card, i) => {
+        card.style.display = i === 0 ? "grid" : "none";
+    });
+
+    const overlay = document.querySelector(".alert-overlay.alert-overlay--solicitud");
+    if (!overlay) return;
+
+    const alertBox = overlay.querySelector(".alert-box");
+    const tituloEl = overlay.querySelector(".alert-title");
+    const mensajeEl = overlay.querySelector(".alert-message");
+    const btnCerrar = overlay.querySelector(".alert-btn");
+
+    if (!alertBox || !tituloEl || !mensajeEl || !btnCerrar) return;
+
+    const focusableSelector =
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    let ultimoFoco = null;
+
+    const configurarMensaje = (accion) => {
+        if (accion === "aceptar") {
+            tituloEl.textContent = "Solicitud aceptada";
+            mensajeEl.textContent =
+                "Has aceptado la oferta. Muy pronto tendrás noticias del propietario de la finca a través de la plataforma o tus datos de contacto registrados.";
+        } else {
+            tituloEl.textContent = "Solicitud rechazada";
+            mensajeEl.textContent =
+                "Has rechazado la oferta. Puedes seguir revisando otras solicitudes disponibles.";
+        }
+    };
+
+    const irASiguienteCard = () => {
+        if (cards[indiceActual]) {
+            cards[indiceActual].style.display = "none";
+        }
+
+        indiceActual += 1;
+
+        if (indiceActual < cards.length) {
+            cards[indiceActual].style.display = "grid";
+        } else {
+
+            const tituloSuperior = document.querySelector(".gestion__rol");
+            if (tituloSuperior) tituloSuperior.style.display = "none";
+
+            const panel = document.querySelector(".gestion__panel");
+            if (panel && !document.getElementById("mensaje-sin-solicitudes")) {
+                const msg = document.createElement("p");
+                msg.id = "mensaje-sin-solicitudes";
+                msg.textContent = "No tienes más solicitudes de empleo pendientes por revisar.";
+                msg.style.padding = "16px";
+                msg.style.textAlign = "center";
+                panel.appendChild(msg);
+            }
+        }
+    };
+
+
+    const manejarKeydown = (e) => {
+        if (!overlay.classList.contains("show")) return;
+
+        if (e.key === "Escape") {
+            e.preventDefault();
+            cerrarOverlay(true);
+        }
+
+        if (e.key === "Tab") {
+            const focusables = Array.from(
+                overlay.querySelectorAll(focusableSelector)
+            ).filter(el => !el.hasAttribute("disabled") && el.offsetParent !== null);
+
+            if (!focusables.length) return;
+
+            const index = focusables.indexOf(document.activeElement);
+            let nextIndex = index;
+
+            if (e.shiftKey) {
+                nextIndex = index <= 0 ? focusables.length - 1 : index - 1;
+            } else {
+                nextIndex = index === focusables.length - 1 ? 0 : index + 1;
+            }
+
+            focusables[nextIndex].focus();
+            e.preventDefault();
+        }
+    };
+
+    const abrirOverlay = () => {
+        ultimoFoco = document.activeElement;
+        overlay.classList.add("show");
+        btnCerrar.focus();
+        document.addEventListener("keydown", manejarKeydown);
+    };
+
+    const cerrarOverlay = (avanza = false) => {
+        overlay.classList.remove("show");
+        document.removeEventListener("keydown", manejarKeydown);
+
+        if (avanza) {
+            irASiguienteCard();
+        }
+
+        if (ultimoFoco) {
+            ultimoFoco.focus();
+        }
+    };
+
+    btnCerrar.addEventListener("click", () => cerrarOverlay(true));
+
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+            cerrarOverlay(true);
+        }
+    });
+
+    cards.forEach((card) => {
+        const btnAceptar = card.querySelector(".solicitud-card__acciones .btn-dark:nth-child(1)");
+        const btnRechazar = card.querySelector(".solicitud-card__acciones .btn-dark:nth-child(2)");
+
+        if (btnAceptar) {
+            btnAceptar.addEventListener("click", (e) => {
+                e.preventDefault();
+                configurarMensaje("aceptar");
+                abrirOverlay();
+            });
+        }
+
+        if (btnRechazar) {
+            btnRechazar.addEventListener("click", (e) => {
+                e.preventDefault();
+                configurarMensaje("rechazar");
+                abrirOverlay();
+            });
+        }
+    });
+});
+
+// -------------------- 12. AVISO GUARDAR CAMBIOS PERFIL ----------------------
+
+document.addEventListener("DOMContentLoaded", () => {
+    const btnGuardar = document.getElementById("btnGuardarPerfil");
+    if (!btnGuardar) return; 
+
+    const destinoHref = btnGuardar.getAttribute("href") || "./info-guardada2.html";
+
+    let overlay = document.querySelector(".alert-overlay.alert-overlay--perfil");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.className = "alert-overlay alert-overlay--perfil";
+        overlay.innerHTML = `
+        <div class="alert-box" role="dialog" aria-modal="true" aria-labelledby="alertPerfilTitle">
+          <h3 id="alertPerfilTitle" class="alert-title">Guardar cambios del perfil</h3>
+          <p class="alert-message">
+            ¿Estás seguro de que deseas guardar los cambios realizados en tu perfil?
+          </p>
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <button type="button" class="alert-btn alert-btn--no">No</button>
+            <button type="button" class="alert-btn alert-btn--yes">Sí, guardar</button>
+          </div>
+        </div>
+      `;
+        document.body.appendChild(overlay);
+    }
+
+    const btnNo = overlay.querySelector(".alert-btn--no");
+    const btnYes = overlay.querySelector(".alert-btn--yes");
+
+    let lastFocused = null;
+    const focusableSelector =
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    const onKeydown = (e) => {
+        if (!overlay.classList.contains("show")) return;
+
+        if (e.key === "Escape") {
+            e.preventDefault();
+            cerrarAlerta();
+        }
+
+        if (e.key === "Tab") {
+            const focusable = Array.from(
+                overlay.querySelectorAll(focusableSelector)
+            ).filter(el => !el.hasAttribute("disabled") && el.offsetParent !== null);
+
+            if (!focusable.length) return;
+
+            const currentIndex = focusable.indexOf(document.activeElement);
+            let nextIndex = currentIndex;
+
+            if (e.shiftKey) {
+                nextIndex = currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1;
+            } else {
+                nextIndex = currentIndex === focusable.length - 1 ? 0 : currentIndex + 1;
+            }
+
+            focusable[nextIndex].focus();
+            e.preventDefault();
+        }
+    };
+
+    const abrirAlerta = () => {
+        lastFocused = document.activeElement;
+        overlay.classList.add("show");
+        (btnNo || overlay).focus();
+        document.addEventListener("keydown", onKeydown);
+    };
+
+    const cerrarAlerta = () => {
+        overlay.classList.remove("show");
+        document.removeEventListener("keydown", onKeydown);
+        if (lastFocused) lastFocused.focus();
+    };
+
+    btnGuardar.addEventListener("click", (e) => {
+        e.preventDefault();
+        abrirAlerta();
+    });
+
+    if (btnNo) {
+        btnNo.addEventListener("click", (e) => {
+            e.preventDefault();
+            cerrarAlerta();
+        });
+    }
+
+    if (btnYes) {
+        btnYes.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.location.href = destinoHref;
+        });
+    }
+
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+            cerrarAlerta();
+        }
+    });
+});
+

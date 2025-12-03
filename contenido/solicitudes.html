@@ -9,7 +9,9 @@
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
     <link rel="stylesheet" href="../style.css">
-    
+
+    <script src="../app.js" defer></script>
+
 </head>
 
 <body>
@@ -52,8 +54,20 @@
             </article>
         </div>
 
-        <a  href="./histo-solicitudes.html" class="btn-dark btn-dark--historial">Historial</a>
-       
+        <a href="./histo-solicitudes.html" class="btn-dark btn-dark--historial">Historial</a>
+
     </section>
+
+    <div class="alert-overlay alert-overlay--solicitud">
+        <div class="alert-box" role="alertdialog" aria-modal="true">
+            <h3 class="alert-title">Solicitud enviada</h3>
+            <p class="alert-message">
+                Has aceptado la oferta. Muy pronto tendrás noticias del propietario de la finca a través de la
+                plataforma o tus datos de contacto registrados.
+            </p>
+            <button type="button" class="alert-btn">Entendido</button>
+        </div>
+    </div>
 </body>
+
 </html>

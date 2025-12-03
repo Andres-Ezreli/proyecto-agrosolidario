@@ -1,4 +1,4 @@
-/* ---------- RESETEAR MÁRGENES PARA EVITAR DESPLAZAMIENTO ---------- */
+/* ---------- RESETEAR MÁRGENES PARA EVITAR DESPLAZAMIENTO ---------- */ 
 * {
     margin: 0;
     padding: 0;
@@ -1679,6 +1679,29 @@ main {
     padding-top: 4px;
 }
 
+.busqueda-card__arrow {
+    grid-area: arrow;
+    justify-self: end;
+    align-self: end;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 4px solid #000;
+    background:#fff;
+    display:grid;
+    place-items:center;
+    font-size: 26px;
+    font-weight: 700;
+    color:#000;
+    text-decoration:none;
+    transition: transform .08s ease, opacity .2s ease;
+}
+
+.busqueda-card__arrow:hover {
+    transform: scale(1.04);
+    opacity:.9;
+}
+
 .busqueda-card__pill {
     min-width: 200px;
     padding: 12px 28px;
@@ -2121,23 +2144,54 @@ main.publicar-oferta {
 
 /* --------------------- RESPONSIVE --------------------- */
 
+
 @media (max-width: 900px) {
+    
     .primer-mockup {
+        height: auto;
+        min-height: 420px;
+        background-position: center top;
+        padding: 80px 16px 40px;
         flex-direction: column;
         text-align: center;
         gap: 20px;
         align-items: center;
         justify-content: center;
-        padding-top: 0;
     }
 
     .texto-izquierda,
     .texto-derecha {
-        width: 80%;
-        max-width: none;
+        position: static;
+        transform: none;
+        width: 100%;
+        max-width: 480px;
         font-size: 22px;
         text-align: center;
-        align-self:center;
+        margin: 0 0 6px;
+    }
+
+    .boton-empieza {
+        position: static;
+        transform: none;
+        margin-top: 10px;
+    }
+
+    .seccion-accesos {
+        flex-direction: column;
+        align-items: center;
+        padding: 50px 16px;
+        gap: 40px;
+    }
+
+    .seccion-accesos .columna {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .tarjeta {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
     }
 
     .mensaje-final {
@@ -2156,13 +2210,13 @@ main.publicar-oferta {
 
     .filters .actions {
         grid-column: 1 / -1;
-        flex-direction:row;
-        justify-content:flex-end;
+        flex-direction: row;
+        justify-content: flex-end;
     }
 
     .busqueda__filters {
-        flex-direction:column;
-        align-items:stretch;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .busqueda__fields {
@@ -2170,8 +2224,8 @@ main.publicar-oferta {
     }
 
     .busqueda__actions {
-        flex-direction:row;
-        justify-content:flex-end;
+        flex-direction: row;
+        justify-content: flex-end;
     }
 
     .busqueda-card {
@@ -2180,21 +2234,27 @@ main.publicar-oferta {
           "img"
           "info"
           "right"
-          "bottom";
+          "bottom"
+          "arrow";
     }
 
     .busqueda-card__right {
-        justify-content:center;
+        justify-content: center;
     }
 
     .busqueda-card__bottom {
-        flex-direction:column;
-        align-items:stretch;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .busqueda-card__pill {
-        width:100%;
+        width: 100%;
         min-width: unset;
+    }
+
+    .busqueda-card__arrow {
+        justify-self: center;
+        margin-top: 8px;
     }
 
     .solicitud-card {
@@ -2457,3 +2517,52 @@ main.publicar-oferta {
         width: 100%;
     }
 }
+
+/* HEADER más flexible para tablets/móviles */
+@media (max-width: 800px) {
+    header {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+    }
+
+    header .logo {
+        font-size: 18px;
+    }
+
+    header nav {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+
+    header nav a {
+        font-size: 13px;
+        padding: 4px 10px;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .texto-izquierda,
+    .texto-derecha {
+        font-size: 18px;
+    }
+
+    .boton-empieza {
+        width: 100%;
+        max-width: 260px;
+    }
+
+    .seccion-info .descripcion,
+    .seccion-info .texto-info {
+        padding: 18px 16px;
+        font-size: 15px;
+    }
+
+    .tarjeta {
+        padding: 22px 18px;
+    }
+}
+
