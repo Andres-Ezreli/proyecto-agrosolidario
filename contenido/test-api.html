@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend-Backend Connection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        
+        .test-section h2 {
+            font-size: 16px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .test-section p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: #764ba2;
+        }
+        
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 3px;
+            font-size: 13px;
+            color: #2e7d32;
+            display: none;
+        }
+        
+        .result.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+        }
+        
+        .result.success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+            color: #2e7d32;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 5px;
+        }
+        
+        .status.connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status.disconnected {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Frontend-Backend Connection</h1>
+        
+        <div id="connectionStatus" class="status disconnected">
+            ⏳ Comprobando conexión...
+        </div>
+        
+        <div class="test-section">
+            <h2>1. Test API Connection</h2>
+            <p>Verifica que el servidor backend esté respondiendo</p>
+            <button onclick="testAPIConnection()">Test Connection</button>
+            <div id="testResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. Test Register</h2>
+            <p>Crea un nuevo usuario de prueba</p>
+            <button onclick="testRegister()">Test Register</button>
+            <div id="registerResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. Test Login</h2>
+            <p>Inicia sesión con el usuario de prueba</p>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4. Test Get Ofertas</h2>
+            <p>Obtiene todas las ofertas disponibles</p>
+            <button onclick="testGetOfertas()">Test Get Ofertas</button>
+            <div id="ofertasResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>5. View Stored Data</h2>
+            <p>Muestra los datos guardados en localStorage</p>
+            <button onclick="viewStoredData()">View Data</button>
+            <div id="dataResult" class="result"></div>
+        </div>
+    </div>
+
+    <script src="../api.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:5001/api';
+        
+        // Check connection on load
+        window.addEventListener('load', checkConnection);
+        
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/test`);
+                if (response.ok) {
+                    document.getElementById('connectionStatus').classList.remove('disconnected');
+                    document.getElementById('connectionStatus').classList.add('connected');
+                    document.getElementById('connectionStatus').textContent = '✓ Connected to Backend';
+                }
+            } catch (error) {
+                document.getElementById('connectionStatus').classList.remove('connected');
+                document.getElementById('connectionStatus').classList.add('disconnected');
+                document.getElementById('connectionStatus').textContent = '✗ Cannot connect to backend. Make sure server is running on port 5000';
+            }
+        }
+        
+        async function testAPIConnection() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/test`);
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✓ ' + data.message;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ Error: ' + error.message;
+            }
+        }
+        
+        async function testRegister() {
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.style.display = 'block';
+            
+            const testEmail = `test${Date.now()}@example.com`;
+            
+            try {
+                const result = await AuthService.register(
+                    'Test User',
+                    testEmail,
+                    'TestPass123',
+                    'persona'
+                );
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✓ Registro exitoso. Token guardado en localStorage';
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ Error: ' + error.message;
+            }
+        }
+        
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.style.display = 'block';
+            
+            try {
+                const result = await AuthService.login('test@example.com', 'password123');
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✓ Login exitoso como: ' + result.user.nombre;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ Error: ' + error.message;
+            }
+        }
+        
+        async function testGetOfertas() {
+            const resultDiv = document.getElementById('ofertasResult');
+            resultDiv.style.display = 'block';
+            
+            try {
+                const ofertas = await OfertaService.getOfertas();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✓ Se encontraron ' + ofertas.length + ' ofertas';
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ Error: ' + error.message;
+            }
+        }
+        
+        function viewStoredData() {
+            const resultDiv = document.getElementById('dataResult');
+            resultDiv.style.display = 'block';
+            
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ No hay datos guardados. Por favor haz login primero.';
+                return;
+            }
+            
+            const userData = JSON.parse(user);
+            resultDiv.className = 'result success';
+            resultDiv.innerHTML = `
+                <strong>Token:</strong> ${token.substring(0, 20)}...<br>
+                <strong>Usuario:</strong> ${userData.nombre}<br>
+                <strong>Email:</strong> ${userData.email}<br>
+                <strong>Rol:</strong> ${userData.role}
+            `;
+        }
+    </script>
+</body>
+</html>

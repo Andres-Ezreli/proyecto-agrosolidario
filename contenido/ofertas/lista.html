@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de ofertas</title>
+
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../api.js" defer></script>
+</head>
+
+<body>
+    <header class="header">
+        <span>AgroSolidario</span>
+        <nav>
+            <a href="../perfil/propietario.html">Mi finca</a>
+            <a href="./index.html">Mis ofertas</a>
+            <a href="../busqueda/index.html">Búsqueda de trabajadores</a>
+            <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <main class="mis-ofertas">
+        <section class="mis-ofertas__wrap">
+            <h1 class="mis-ofertas__title">Mis ofertas:</h1>
+
+            <div class="mis-ofertas__tabla">
+                <table class="mis-ofertas-table">
+                    <thead>
+                        <tr>
+                            <th>Titulo del trabajo</th>
+                            <th>Personas que aceptaron</th>
+                            <th>Estado de la oferta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ofertas-tbody">
+                        <!-- Dynamic content loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mis-ofertas__actions">
+                <a href="./publicar.html" class="btn-dark mis-ofertas__publish">Publicar oferta</a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const ofertas = await OfertaService.getOfertas();
+                const tbody = document.getElementById('ofertas-tbody');
+                
+                if (ofertas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No tienes ofertas publicadas</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = ofertas.map(oferta => `
+                    <tr>
+                        <td>${oferta.titulo}</td>
+                        <td>
+                            <a href="./revisar-persona.html?id=${oferta._id}" class="btn-dark btn-dark--review">Revisar</a>
+                        </td>
+                        <td class="mis-ofertas__estado">${oferta.estado === 'activa' ? 'Activa' : 'Finalizada'}</td>
+                        <td>
+                            ${oferta.estado === 'activa' 
+                                ? `<a href="./fin.html?id=${oferta._id}" class="btn-dark mis-ofertas__finalizar">Finalizar</a>`
+                                : oferta.fechaInicio
+                            }
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading ofertas:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>

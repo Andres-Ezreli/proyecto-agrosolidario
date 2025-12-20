@@ -10,4 +10,7 @@ router.post('/login', authController.login);
 // Protected routes
 router.get('/me', protect, authController.getMe);
 
+// Get all users (public for testing)
+router.get('/users', authController.getAllUsers);
+
 module.exports = router;

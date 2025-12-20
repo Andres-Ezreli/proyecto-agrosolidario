@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda de trabajadores</title>
+
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../api.js" defer></script>
+</head>
+
+<body>
+    <header class="header">
+        <span>AgroSolidario</span>
+        <nav>
+            <a href="../perfil/propietario.html">Mi finca</a>
+            <a href="../ofertas/index.html">Mis ofertas</a>
+            <a href="./index.html">Búsqueda de trabajadores</a>
+            <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <main class="busqueda">
+        <div class="busqueda__wrap">
+            <h1 class="busqueda__title">Búsqueda de trabajadores:</h1>
+
+            <section class="busqueda__filters">
+                <div class="busqueda__fields">
+                    <div class="busqueda__field">
+                        <label for="ubicacion">Ubicación:</label>
+                        <input id="ubicacion" type="text">
+                    </div>
+
+                    <div class="busqueda__field">
+                        <label for="habilidades">Habilidades:</label>
+                        <input id="habilidades" type="text">
+                    </div>
+
+                    <div class="busqueda__field">
+                        <label for="edad">Edad:</label>
+                        <input id="edad" type="number">
+                    </div>
+                </div>
+
+                <div class="busqueda__actions">
+                    <button id="btnLimpiar" class="busqueda__btn">Limpiar</button>
+                    <button id="btnBuscar" class="busqueda__btn">Buscar</button>
+                </div>
+            </section>
+
+            <div id="trabajadores-container">
+                <!-- Dynamic content loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadTrabajadores() {
+            try {
+                const response = await fetch('http://localhost:5001/api/trabajadores');
+                const data = await response.json();
+                const trabajadores = data.data || [];
+                
+                const container = document.getElementById('trabajadores-container');
+                
+                if (trabajadores.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;padding:20px;">No hay trabajadores disponibles</p>';
+                    return;
+                }
+                
+                container.innerHTML = trabajadores.map(t => `
+                    <article class="busqueda-card">
+                        <img class="busqueda-card__img" src="../../imagenes/campesino.jpg" alt="Foto trabajador">
+                        <div class="busqueda-card__info">
+                            <h2 class="busqueda-card__name">${t.userId?.nombre || 'Trabajador'}</h2>
+                            <p>${t.edad} años</p>
+                            <p>${t.ubicacion}</p>
+                            <p>${t.habilidades}</p>
+                        </div>
+                        <div class="busqueda-card__right">
+                            <a href="./detalles.html?id=${t._id}" class="btn-dark btn-dark--detalles">Detalles</a>
+                        </div>
+                        <div class="busqueda-card__bottom">
+                            <button class="btn-dark busqueda-card__pill">${t.disponible ? 'Disponible' : 'No disponible'}</button>
+                            <a href="./enviar-solicitud.html?id=${t._id}" class="btn-dark busqueda-card__pill">Enviar solicitud</a>
+                        </div>
+                    </article>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading trabajadores:', error);
+                document.getElementById('trabajadores-container').innerHTML = '<p style="text-align:center;padding:20px;">Error al cargar trabajadores</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTrabajadores);
+
+        document.getElementById('btnLimpiar').addEventListener('click', () => {
+            document.getElementById('ubicacion').value = '';
+            document.getElementById('habilidades').value = '';
+            document.getElementById('edad').value = '';
+            loadTrabajadores();
+        });
+
+        document.getElementById('btnBuscar').addEventListener('click', () => {
+            // Filter logic would go here
+            loadTrabajadores();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalles trabajador</title>
+
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../style.css">
+  <script src="../../api.js" defer></script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">AgroSolidario</div>
+    <nav>
+      <a href="../perfil/propietario.html">Mi finca</a>
+      <a href="../ofertas/index.html">Mis ofertas</a>
+      <a href="./index.html">Búsqueda de trabajadores</a>
+      <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <article class="aceptados-card" id="trabajador-card">
+      <div class="aceptados-card__left">
+        <img class="aceptados-card__img" src="../../imagenes/campesino.jpg" alt="Foto de trabajador">
+      </div>
+
+      <div class="aceptados-card__info">
+        <h2 class="aceptados-card__name" id="nombre">Cargando...</h2>
+        <p id="edad"></p>
+        <p id="email"></p>
+        <p id="celular"></p>
+        <p id="ubicacion"></p>
+        <p class="aceptados-card__bio" id="experiencia"></p>
+        <p id="habilidades"></p>
+      </div>
+    </article>
+
+    <div class="aceptados-nav">
+      <a href="./index.html" class="btn-dark aceptados-nav__btn">Volver</a>
+      <a href="./enviar-solicitud.html" class="btn-dark aceptados-nav__btn" id="btn-enviar">Enviar solicitud</a>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      
+      // Sample data - would be loaded from API
+      document.getElementById('nombre').textContent = 'Julio Gonzalo García López';
+      document.getElementById('edad').textContent = '32 años';
+      document.getElementById('email').textContent = 'julio@email.com';
+      document.getElementById('celular').textContent = '3201234567';
+      document.getElementById('ubicacion').textContent = 'San Vicente, Antioquia';
+      document.getElementById('experiencia').textContent = 'Experiencia de 10 años en recolección de café. Conocimiento en selección de grano maduro y manejo de canastos.';
+      document.getElementById('habilidades').textContent = 'Recolección de café, Conducción, Motosierra';
+      
+      document.getElementById('btn-enviar').href = './enviar-solicitud.html?id=' + id;
+    });
+  </script>
+</body>
+
+</html>

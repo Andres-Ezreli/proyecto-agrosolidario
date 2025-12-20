@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis ofertas</title>
+
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <div class="logo">AgroSolidario</div>
+    <nav>
+      <a href="../perfil/propietario.html">Mi finca</a>
+      <a href="./index.html">Mis ofertas</a>
+      <a href="../busqueda/index.html">Búsqueda de trabajadores</a>
+      <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main class="mis-ofertas">
+    <section class="panel panel--mis-ofertas">
+      <h1 class="title">Mis ofertas:</h1>
+      <p class="subtitle">¿Qué deseas realizar?</p>
+
+      <div class="cards cards--mis-ofertas">
+        <article class="card card--mis-ofertas">
+          <h3>Publicar una oferta</h3>
+          <p>Click para seleccionar esta<br>opción</p>
+          <a class="radio" href="./publicar.html" aria-label="Seleccionar publicar oferta"></a>
+        </article>
+
+        <article class="card card--mis-ofertas">
+          <h3>Revisar mis ofertas</h3>
+          <p>Click para seleccionar esta<br>opción</p>
+          <a class="radio" href="./lista.html" aria-label="Seleccionar revisar ofertas"></a>
+        </article>
+      </div>
+    </section>
+
+    <div id="alertOverlay" class="alert-overlay">
+      <div class="alert-box">
+        <div class="alert-title">Aviso</div>
+        <div id="alertMsg" class="alert-message"></div>
+        <button id="alertBtn" class="alert-btn">OK</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const flagPublicada = sessionStorage.getItem("mostrarAvisoPublicada") === "1";
+      if (!flagPublicada) return;
+
+      const alertOverlay = document.getElementById("alertOverlay");
+      const alertMsg = document.getElementById("alertMsg");
+      const alertBtn = document.getElementById("alertBtn");
+
+      alertMsg.textContent = "Su oferta ya está disponible para las personas ideales para ese cargo.";
+      alertOverlay.classList.add("show");
+      alertBtn.onclick = () => alertOverlay.classList.remove("show");
+      sessionStorage.removeItem("mostrarAvisoPublicada");
+    });
+  </script>
+</body>
+
+</html>

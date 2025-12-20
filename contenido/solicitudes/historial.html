@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de solicitudes</title>
+
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../api.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">AgroSolidario</div>
+        <nav>
+            <a href="./index.html">Gestión de solicitudes</a>
+            <a href="../perfil/persona.html">Perfil</a>
+            <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <section class="gestion">
+        <div class="gestion__encabezado">
+            <h1>Historial de solicitudes</h1>
+            <p>Revisa el historial de tus solicitudes de empleo</p>
+        </div>
+
+        <div class="gestion__panel" id="historial-container">
+            <!-- Dynamic content loaded here -->
+        </div>
+
+        <a href="./index.html" class="btn-dark btn-dark--historial">Volver</a>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Get all solicitudes received (from propietarios)
+                const solicitudes = await SolicitudService.getSolicitudesRecibidas();
+                const container = document.getElementById('historial-container');
+                
+                // Filter to show only processed ones (accepted or rejected)
+                const procesadas = solicitudes.filter(s => s.estado === 'aceptada' || s.estado === 'rechazada');
+                
+                if (procesadas.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;padding:20px;">No tienes historial de solicitudes</p>';
+                    return;
+                }
+                
+                procesadas.forEach(sol => {
+                    const oferta = sol.ofertaId || {};
+                    const propietario = sol.propietarioId || {};
+                    const estadoColor = sol.estado === 'aceptada' ? 'green' : 'red';
+                    const estadoTexto = sol.estado === 'aceptada' ? 'Aceptada' : 'Rechazada';
+                    
+                    container.innerHTML += `
+                        <article class="solicitud-card">
+                            <img class="solicitud-card__img" src="../../imagenes/finca.jpeg" alt="Foto de la finca">
+                            <div class="solicitud-card__info">
+                                <p><strong>Oferta:</strong> ${oferta.titulo || 'N/A'}</p>
+                                <p><strong>Propietario:</strong> ${propietario.nombre || 'N/A'}</p>
+                                <p><strong>Salario:</strong> $${oferta.salario?.toLocaleString() || 'N/A'}</p>
+                                <p><strong>Estado:</strong> <span style="color:${estadoColor};font-weight:bold;">${estadoTexto}</span></p>
+                                <p><strong>Mensaje:</strong> ${sol.mensaje || 'Sin mensaje'}</p>
+                            </div>
+                        </article>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading historial:', error);
+                document.getElementById('historial-container').innerHTML = 
+                    '<p style="text-align:center;padding:20px;color:red;">Error al cargar historial: ' + error.message + '</p>';
+            }
+        });
+    </script>
+</body>
+
+</html>

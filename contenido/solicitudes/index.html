@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes de empleo</title>
+
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../api.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">AgroSolidario</div>
+        <nav>
+            <a href="./index.html">Gestión de solicitudes</a>
+            <a href="../perfil/persona.html">Perfil</a>
+            <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <section class="gestion">
+        <div class="gestion__encabezado">
+            <h1>Gestión de solicitudes de empleo</h1>
+            <p>Acepta o rechaza la solicitud de empleo enviada por el propietario de finca</p>
+        </div>
+
+        <div class="gestion__panel" id="solicitudes-container">
+            <h2 class="gestion__rol">Trabajador agrícola</h2>
+            <!-- Dynamic content loaded here -->
+        </div>
+
+        <a href="./historial.html" class="btn-dark btn-dark--historial">Historial</a>
+    </section>
+
+    <div class="alert-overlay alert-overlay--solicitud" id="alertOverlay">
+        <div class="alert-box" role="alertdialog" aria-modal="true">
+            <h3 class="alert-title" id="alertTitle">Solicitud enviada</h3>
+            <p class="alert-message" id="alertMessage">
+                Has aceptado la oferta. Muy pronto tendrás noticias del propietario de la finca a través de la
+                plataforma o tus datos de contacto registrados.
+            </p>
+            <button type="button" class="alert-btn" onclick="document.getElementById('alertOverlay').classList.remove('show')">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Get solicitudes sent TO this trabajador by propietarios
+                const solicitudes = await SolicitudService.getSolicitudesRecibidas();
+                const container = document.getElementById('solicitudes-container');
+                
+                // Filter to show only pending ones
+                const pendientes = solicitudes.filter(s => s.estado === 'pendiente');
+                
+                if (pendientes.length === 0) {
+                    container.innerHTML += '<p style="text-align:center;padding:20px;">No tienes solicitudes pendientes</p>';
+                    return;
+                }
+                
+                pendientes.forEach(sol => {
+                    const oferta = sol.ofertaId || {};
+                    const propietario = sol.propietarioId || {};
+                    
+                    container.innerHTML += `
+                        <article class="solicitud-card">
+                            <img class="solicitud-card__img" src="../../imagenes/finca.jpeg" alt="Foto de la finca">
+                            <div class="solicitud-card__info">
+                                <p><strong>Oferta:</strong> ${oferta.titulo || 'N/A'}</p>
+                                <p><strong>Propietario:</strong> ${propietario.nombre || 'N/A'}</p>
+                                <p><strong>Salario:</strong> $${oferta.salario?.toLocaleString() || 'N/A'}</p>
+                                <p><strong>Mensaje:</strong> ${sol.mensaje || 'Sin mensaje'}</p>
+                            </div>
+                            <div class="solicitud-card__detalles">
+                                <a href="../ofertas/detalles.html?id=${oferta._id}" class="btn-dark btn-dark--detalles">Ver oferta</a>
+                            </div>
+                            <div class="solicitud-card__acciones">
+                                <button class="btn-dark" onclick="handleSolicitud('${sol._id}', 'aceptada')">Aceptar</button>
+                                <button class="btn-dark" onclick="handleSolicitud('${sol._id}', 'rechazada')">Rechazar</button>
+                            </div>
+                        </article>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading solicitudes:', error);
+                document.getElementById('solicitudes-container').innerHTML += 
+                    '<p style="text-align:center;padding:20px;color:red;">Error al cargar solicitudes: ' + error.message + '</p>';
+            }
+        });
+
+        async function handleSolicitud(id, estado) {
+            try {
+                await SolicitudService.updateSolicitud(id, estado);
+                
+                // Update alert message based on action
+                const alertTitle = document.getElementById('alertTitle');
+                const alertMessage = document.getElementById('alertMessage');
+                
+                if (estado === 'aceptada') {
+                    alertTitle.textContent = 'Oferta aceptada';
+                    alertMessage.textContent = 'Has aceptado la oferta. Muy pronto tendrás noticias del propietario de la finca a través de la plataforma o tus datos de contacto registrados.';
+                } else {
+                    alertTitle.textContent = 'Oferta rechazada';
+                    alertMessage.textContent = 'Has rechazado la oferta. La solicitud ha sido eliminada de tu lista.';
+                }
+                
+                document.getElementById('alertOverlay').classList.add('show');
+                setTimeout(() => location.reload(), 2000);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

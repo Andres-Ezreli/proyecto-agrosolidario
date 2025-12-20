@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisar personas</title>
+
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <link rel="stylesheet" href="../../style.css">
+    <script src="../../api.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">AgroSolidario</div>
+        <nav>
+            <a href="../perfil/propietario.html">Mi finca</a>
+            <a href="./index.html">Mis ofertas</a>
+            <a href="../busqueda/index.html">Búsqueda de trabajadores</a>
+            <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <section class="aceptados">
+        <h1 class="aceptados__title">Personas que aceptaron la oferta:</h1>
+
+        <div id="personas-container">
+            <!-- Dynamic content loaded here -->
+        </div>
+
+        <div class="aceptados-nav">
+            <a href="./lista.html" class="btn-dark aceptados-nav__btn">Volver</a>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('personas-container');
+            
+            // For now, show sample data - this would be connected to API
+            container.innerHTML = `
+                <article class="aceptados-card">
+                    <div class="aceptados-card__left">
+                        <img class="aceptados-card__img" src="../../imagenes/campesino.jpg" alt="Foto de trabajador">
+                        <a href="./seleccionar.html" class="btn-dark aceptados-card__btn">Seleccionar</a>
+                    </div>
+
+                    <div class="aceptados-card__info">
+                        <h2 class="aceptados-card__name">Julio Gonzalo García López</h2>
+                        <p>32 años</p>
+                        <p>julio@email.com</p>
+                        <p>3201234567</p>
+                        <p>San Vicente, Antioquia</p>
+                        <p class="aceptados-card__bio">
+                            Experiencia de 10 años en recolección de café. Conocimiento en selección de grano maduro y manejo de canastos.
+                        </p>
+                        <p>Recolección de café, Conducción, Motosierra</p>
+                    </div>
+                </article>
+            `;
+        });
+    </script>
+</body>
+
+</html>

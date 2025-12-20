@@ -6,50 +6,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Publicar oferta</title>
 
-  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-
-  <link rel="stylesheet" href="../style.css">
-
-  <script src="../app.js" defer></script>
-
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../style.css">
+  <script src="../../api.js" defer></script>
 </head>
 
 <body>
   <header>
     <div class="logo">AgroSolidario</div>
     <nav>
-      <a href="./pe-propietario.html">Mi finca</a>
-      <a href="./ofertas.html">Mis ofertas</a>
-      <a href="./busqueda.html">Búsqueda de trabajadores</a>
-      <a href="../index.html">Cerrar sesión</a>
+      <a href="../perfil/propietario.html">Mi finca</a>
+      <a href="./index.html">Mis ofertas</a>
+      <a href="../busqueda/index.html">Búsqueda de trabajadores</a>
+      <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
     </nav>
   </header>
 
   <main class="publicar-oferta">
     <section class="publicar-oferta__wrap">
-
       <h1 class="publicar-oferta__title">Publicar nueva oferta de empleo:</h1>
       <p class="publicar-oferta__subtitle">
         Llena la información sobre el trabajo disponible en su finca.
       </p>
 
       <form id="form-publicar">
-
-        <!-- Card 1 -->
         <div class="form-box publicar-oferta__card">
           <div class="publicar-oferta__field">
             <label for="titulo">Titulo del trabajo:</label>
-            <input id="titulo" type="text" />
+            <input id="titulo" type="text" required>
           </div>
 
           <div class="publicar-oferta__field">
             <label for="descripcion">Descripción del trabajo:</label>
-            <textarea id="descripcion"></textarea>
+            <textarea id="descripcion" required></textarea>
           </div>
 
           <div class="publicar-oferta__field">
             <label for="requisitos">Requisitos del trabajo:</label>
-            <textarea id="requisitos"></textarea>
+            <textarea id="requisitos" required></textarea>
           </div>
         </div>
 
@@ -57,27 +51,25 @@
           <div class="row publicar-oferta__row">
             <div>
               <label for="salario">Salario:</label>
-              <input id="salario" type="number" />
+              <input id="salario" type="number" required>
             </div>
 
             <div>
               <label for="num">Número de trabajadores requeridos:</label>
-              <input id="num" type="number" />
+              <input id="num" type="number" required>
             </div>
 
             <div class="full">
               <label for="fecha">Fecha de inicio de la oferta:</label>
-              <input id="fecha" type="text" placeholder="dd/mm/aaaa" />
+              <input id="fecha" type="text" placeholder="dd/mm/aaaa" required>
             </div>
           </div>
         </div>
 
-        <!-- Acciones -->
         <div class="publicar-oferta__actions">
           <button type="submit" class="btn-dark publicar-oferta__btn">Publicar</button>
-          <a href="./ofertas.html" class="btn-dark publicar-oferta__btn">Cancelar</a>
+          <a href="./index.html" class="btn-dark publicar-oferta__btn">Cancelar</a>
         </div>
-
       </form>
 
       <div id="alertOverlay" class="alert-overlay">
@@ -87,10 +79,31 @@
           <button id="alertBtn" class="alert-btn">OK</button>
         </div>
       </div>
-
     </section>
   </main>
 
+  <script>
+    document.getElementById('form-publicar').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      try {
+        const ofertaData = {
+          titulo: document.getElementById('titulo').value,
+          descripcion: document.getElementById('descripcion').value,
+          requisitos: document.getElementById('requisitos').value,
+          salario: parseInt(document.getElementById('salario').value),
+          numeroTrabajadores: parseInt(document.getElementById('num').value),
+          fechaInicio: document.getElementById('fecha').value,
+        };
+
+        await OfertaService.createOferta(ofertaData);
+        sessionStorage.setItem("mostrarAvisoPublicada", "1");
+        window.location.href = './index.html';
+      } catch (error) {
+        alert('Error al publicar oferta: ' + error.message);
+      }
+    });
+  </script>
 </body>
 
 </html>

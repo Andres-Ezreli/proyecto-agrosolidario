@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seleccionar persona</title>
+
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../style.css">
+  <script src="../../api.js" defer></script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">AgroSolidario</div>
+    <nav>
+      <a href="../perfil/propietario.html">Mi finca</a>
+      <a href="./index.html">Mis ofertas</a>
+      <a href="../busqueda/index.html">Búsqueda de trabajadores</a>
+      <a href="../../index.html" onclick="AuthService.logout()">Cerrar sesión</a>
+    </nav>
+  </header>
+
+  <main class="seleccion-persona">
+    <h1 class="seleccion-persona__title">Acabas de seleccionar a:</h1>
+
+    <div class="seleccion-persona__card seleccion-persona__card--nombre">
+      <p id="nombre-persona">Julio Gonzalo García López</p>
+    </div>
+
+    <div class="seleccion-persona__card seleccion-persona__card--accion">
+      <p>¡Persona seleccionada exitosamente!</p>
+      <a href="./lista.html" class="btn-dark seleccion-persona__btn">Volver</a>
+    </div>
+  </main>
+</body>
+
+</html>
